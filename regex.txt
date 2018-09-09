@@ -1,0 +1,21 @@
+// Identifier regex:
+// \b(?!['"\d])[_0-9a-zA-Z]+(?!['"])\b
+
+// quote regex(double quote, single quote, empty):
+// ((["].+["])|(['].+[']))|(('')|(""))
+
+// float regex:
+// \b[0-9].+[.0-9][0-9]\b
+
+// integer regex:
+// \b[0-9].+[0-9]\b
+
+// hex regex:
+// 0x[0-9a-fA-F]*
+
+// binary regrex:
+// \b([10]+)b\b
+
+// final regex:
+final_regex = "\\b(?![\'\"\\d])[_0-9a-zA-Z]+(?![\'\"])\\b|([\"].+[\"])|([\'].+[\'])|(\'\')|(\"\")|\\b[0-9].+[.0-9][0-9]\\b|\\b[0-9].+[0-9]\\b|0x[0-9a-fA-F]*|\\b([10]+)b\\b|[^\w\s]";
+

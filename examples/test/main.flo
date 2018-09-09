@@ -1,0 +1,10 @@
+/*
+    this is multi line comment
+*/
+
+//single line comment
+
+u8 _from = 0;
+u8 to = 10.678;
+for (from, to, +1) = {
+}

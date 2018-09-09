@@ -1,0 +1,31 @@
+
+struct {
+    bit a;
+    bit s;
+    i8 d;
+} someClass;
+
+extend someClass {
+    void toggleA(){
+        this.a = !this.a;
+    }
+
+    bool toggleS(){
+        if this.s {
+            return true;
+        }
+        return false;
+    }
+
+    void setD(i8 newD){
+        this.d = newD;
+    }
+}
+
+bool logical(){
+    let l = 0
+    if any l{
+        return true;
+    }
+    return false;
+}
