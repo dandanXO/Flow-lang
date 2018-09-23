@@ -9,10 +9,12 @@ You can compile Flow code to a excutable file or run it on interpreter, that mea
 Thats impressive isn't it?
 
 **Milestones**
+
 2. Compiling <-> Interpreting
 
 ## Architecture
 **Preprocessing**
+
 Generate source code base on the environment variables.
 Workflow:
 1. Gathering host infomation(platform, target, current directory, output directory, passed arguments)

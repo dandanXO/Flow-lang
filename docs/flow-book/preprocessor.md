@@ -9,7 +9,8 @@
 | @end | -- | -- | Represent the end of the region |
 | @elif | -- | -- | Else-if condition, must pair with ```@else```, ```@elif``` or ```@end```
 | @env | collections | -- | Store environment variables |
-| @workspace | string | -- | Absolute path of workspace |
+| @projectRoot | string | -- | Absolute path of workspace |
+| @pwd | string | Relative path of this file (relative to PROJECT_ROOT) 
 | @file | string | -- | File name with extension |
 | @path | string | -- | Path of file (relative path to @workspace) |
 | @date | string | -- | Full date in string |

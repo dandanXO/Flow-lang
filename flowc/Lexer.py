@@ -1,3 +1,5 @@
+#coding=UTF-8
+
 from Constant.Tokens import TokenList, Token, TokenDataType
 import re
 from Errors import SyntaxError
@@ -8,8 +10,8 @@ hex_pattern = r'0x[0-9a-fA-F]*'
 bin_pattern = r'\b([10]+)b\b'
 
 class Lexer:
-    def __init__(self, raw_code):
-        self.code = raw_code
+    def __init__(self, code=None):
+        self.code = code
         self.cursor = 0
         self.line = 1
         self.col = 1
@@ -85,6 +87,12 @@ class Lexer:
         #self.lookup['=>'] = TokenList.sym_flow
         #self.lookup['?'] = TokenList.sym_
     
+    def SetInput(self, code):
+        self.cursor = 0
+        self.line = 1
+        self.col = 0
+        self.code = code
+
     def Ended(self):
         return True if self.cursor >= len(self.code)-1 else False
 
@@ -109,14 +117,14 @@ class Lexer:
         #Skip comment
         while self.SkipCommentIfNeeded():
             # while current character is space
-            while str.isspace(self.code[self.cursor]):
+            while str.isspace(self.code[self.cursor]) or self.code[self.cursor] == '\n':
                 self.NextChar()
         #Skip spaces
-        while str.isspace(self.code[self.cursor]):
+        while str.isspace(self.code[self.cursor]) or self.code[self.cursor] == '\n':
             self.NextChar()
         #Detect EOF
-        if self.Ended():
-            return Token('EndOfFile', (self.line, self.col))
+        if self.Ended() or self.code[self.cursor] == '\0':
+            return Token(TokenList.Eof, self.GetPackedPos())
         
         #if it is a alphabit character or a underscore
         if str.isalpha(self.code[self.cursor]) or self.code[self.cursor] == '_':
@@ -136,16 +144,17 @@ class Lexer:
     
     def SkipCommentIfNeeded(self):
         # if it is a space, that mean we have to skip it
-        if str.isspace(self.code[self.cursor]):
+        if str.isspace(self.code[self.cursor]) or self.code[self.cursor] == '\n':
             return True
         # if it is not what we looking for, then return false
         if self.code[self.cursor] != '/':
             return False
-        
+
         unsure_symbol = ''
         #collect symbols
-        while self.Ended():
-            if str.isspace(self.code[self.cursor]) or str.isalnum(self.code[self.cursor]):
+        while not self.Ended():
+            if str.isspace(self.code[self.cursor]) \
+            or str.isalnum(self.code[self.cursor]):
                 break
             unsure_symbol += self.NextChar()
         
@@ -188,16 +197,16 @@ class Lexer:
             try:
                 return Token(TokenList.float_literal, self.GetPackedPos(len(num_text)), TokenDataType.numberic, float(num_text))
             except ValueError:
-                raise SyntaxError('Fail to fetch a float from text: "' + num_text + '"', self.GetPackedPos(len(num_text)))  
+                raise SyntaxError('Fail to fetch a float from text: "{}"'.format(num_text), self.GetPackedPos(len(num_text)))  
         elif dec_checker.match(num_text):
             # it is a decimal number
             try:
                 # try to convert num_text to a integer
                 return Token(TokenList.int_literal, self.GetPackedPos(len(num_text)), TokenDataType.numberic, int(num_text, 10))
             except ValueError:
-                raise SyntaxError('Fail to fetch a integer from text: "' + num_text + '"', self.GetPackedPos(len(num_text)))  
+                raise SyntaxError('Fail to fetch a integer from text: "{}"'.format(num_text), self.GetPackedPos(len(num_text)))  
         else:
-            raise SyntaxError('Unknown type of number: "' + num_text + '"', self.GetPackedPos(len(num_text)))
+            raise SyntaxError('Unknown type of number: "{}"'.format(num_text), self.GetPackedPos(len(num_text)))
 
     def GetStringToken(self):
         text = ''
@@ -217,6 +226,7 @@ class Lexer:
                      '\'':seek, 
                      '"':seek
                      }
+                     # buggy
                     current = simple_match[seek]
                 text += current
             else:
@@ -237,17 +247,22 @@ class Lexer:
             single = self.code[self.cursor]
 
             if not (single in self.lookup):
-                raise RuntimeError("[tempo error] unknown symbol: ", single, hex(single))
+                raise SyntaxError("Unknown symbol: {}".format(single.encode('utf-8')), self.GetPackedPos())
             else:
                 unsure_symbol = single
         return Token(self.lookup[unsure_symbol], self.GetPackedPos())
 
 if __name__ == '__main__':
     # Test function here
-    #TODO: fix number handle
-    test_code = "u8 i = 0.764;"
-    
-    lexer = Lexer(test_code)
+    print('### Lexer test ###')
+
+    lexer = Lexer()
+
+    print('* Comment ---------- ', end='')
+    comment_code = '// message here\n\0'
+    lexer.code = comment_code
     while not lexer.Ended():
-        tok = lexer.GetNextToken()
-        print(tok)
+        print(lexer.GetNextToken())
+
+    print('* Function ---------- ', end='')
+    print('* Statment ---------- ', end='')

@@ -69,9 +69,9 @@ class TokenList(Enum):
     sym_greater_equal = '>='
     sym_shift_right = '>>'
     sym_comma = ','
-    # Identifier
+
     identifier = 'Identifier'
-    # Literal
+    # Literals
     str_literal = 'StringLiteral'
     float_literal = 'FloatLiteral'
     int_literal = 'IntegerLiteral'
@@ -93,4 +93,4 @@ class Token:
         data_msg = ""
         if self.kind != TokenDataType.none:
             data_msg = ' with data "' + str(self.data) + '"'
-        return 'Token ' + str(self.id) + data_msg + ' at ' + str(self.pos) + ''
+        return 'Token ' + self.id.value + data_msg + ' at ' + str(self.pos) + ''
