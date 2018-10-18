@@ -2,7 +2,6 @@ from enum import Enum, unique
 
 @unique
 class TokenList(Enum):
-    Eof = 'EndOfFile'
     # Keywords
     kw_nil = 'nil'
     kw_for = 'for'
@@ -20,6 +19,7 @@ class TokenList(Enum):
     kw_while = 'while'
     kw_return = 'return'
     # Types
+    pt_let = 'let'
     pt_bool = 'bool'
     pt_u8 = 'u8'
     pt_u16 = 'u16'
@@ -29,6 +29,8 @@ class TokenList(Enum):
     pt_i16 = 'i16'
     pt_i32 = 'i32'
     pt_i64 = 'i64'  
+    pt_float = 'f32'
+    pt_double = 'f64'
     # Operators
     sym_not = '!'
     sym_not_equal = '!='
@@ -79,8 +81,9 @@ class TokenList(Enum):
 @unique
 class TokenDataType(Enum):
     none = 0
-    numberic = 1
-    string = 2
+    integer = 1
+    floating = 2
+    string = 3
 
 class Token:
     def __init__(self, id, pos, kind=TokenDataType.none, data=None):

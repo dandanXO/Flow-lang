@@ -1,6 +1,4 @@
-#coding=UTF-8
-
-from Constant.Tokens import TokenList, Token, TokenDataType
+from Constants.Tokens import TokenList, Token, TokenDataType
 import re
 from Errors import SyntaxError
 
@@ -34,6 +32,7 @@ class Lexer:
         self.lookup['while'] = TokenList.kw_while
         self.lookup['return'] = TokenList.kw_return
         #Primitive types
+        self.lookup['let'] = TokenList.pt_let
         self.lookup['bool'] = TokenList.pt_bool
         self.lookup['u8'] = TokenList.pt_u8
         self.lookup['u16'] = TokenList.pt_u16
@@ -43,11 +42,13 @@ class Lexer:
         self.lookup['i16'] = TokenList.pt_i16
         self.lookup['i32'] = TokenList.pt_i32
         self.lookup['i64'] = TokenList.pt_i64
-        #Operators
+        self.lookup['f32'] = TokenList.pt_float
+        self.lookup['f64'] = TokenList.pt_double
+        #Symbols
         self.lookup['!'] = TokenList.sym_not
         self.lookup['!='] = TokenList.sym_not_equal
         self.lookup['@'] = TokenList.sym_at
-        #self.lookup['#'] = TokenList.sym_hash
+        self.lookup['#'] = TokenList.sym_hash
         #self.lookup['$'] = TokenList.sym_dollar
         self.lookup['%'] = TokenList.sym_remainder
         self.lookup['%='] = TokenList.sym_assign_remain
@@ -112,6 +113,12 @@ class Lexer:
             self.col = 1
         self.cursor += 1
         return c
+
+    def Lex(self):
+        toks = []
+        while not self.Ended():
+            toks.append(self.GetNextToken())
+        return toks
     
     def GetNextToken(self):
         #Skip comment
@@ -119,12 +126,14 @@ class Lexer:
             # while current character is space
             while str.isspace(self.code[self.cursor]) or self.code[self.cursor] == '\n':
                 self.NextChar()
+                
         #Skip spaces
         while str.isspace(self.code[self.cursor]) or self.code[self.cursor] == '\n':
             self.NextChar()
+
         #Detect EOF
         if self.Ended() or self.code[self.cursor] == '\0':
-            return Token(TokenList.Eof, self.GetPackedPos())
+            return None
         
         #if it is a alphabit character or a underscore
         if str.isalpha(self.code[self.cursor]) or self.code[self.cursor] == '_':
@@ -180,7 +189,7 @@ class Lexer:
         #if it is in the lookup list
         if ident in self.lookup:
             return Token(self.lookup[ident], self.GetPackedPos())
-        #it is just a identifer
+        #it is just a identifer 
         return Token(TokenList.identifier, self.GetPackedPos(), TokenDataType.string, ident)
 
     def GetNumbericToken(self):
@@ -195,14 +204,14 @@ class Lexer:
 
         if float_checker.match(num_text):
             try:
-                return Token(TokenList.float_literal, self.GetPackedPos(len(num_text)), TokenDataType.numberic, float(num_text))
+                return Token(TokenList.float_literal, self.GetPackedPos(len(num_text)), TokenDataType.floating, float(num_text))
             except ValueError:
                 raise SyntaxError('Fail to fetch a float from text: "{}"'.format(num_text), self.GetPackedPos(len(num_text)))  
         elif dec_checker.match(num_text):
             # it is a decimal number
             try:
                 # try to convert num_text to a integer
-                return Token(TokenList.int_literal, self.GetPackedPos(len(num_text)), TokenDataType.numberic, int(num_text, 10))
+                return Token(TokenList.int_literal, self.GetPackedPos(len(num_text)), TokenDataType.integer, int(num_text, 10))
             except ValueError:
                 raise SyntaxError('Fail to fetch a integer from text: "{}"'.format(num_text), self.GetPackedPos(len(num_text)))  
         else:
@@ -231,7 +240,7 @@ class Lexer:
                 text += current
             else:
                 break
-        return Token(TokenList.str_literal, (self.line, self.col - len(text)), text)    
+        return Token(TokenList.str_literal, (self.line, self.col - len(text)), TokenDataType.string, text)    
 
     def GetSymbolToken(self):
         unsure_symbol = ''
