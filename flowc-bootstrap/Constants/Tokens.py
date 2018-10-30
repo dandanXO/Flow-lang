@@ -18,6 +18,7 @@ class TokenList(Enum):
     kw_false = 'false'
     kw_while = 'while'
     kw_return = 'return'
+    kw_scope = 'scope' #not yet implemented
     # Types
     pt_let = 'let'
     pt_bool = 'bool'
