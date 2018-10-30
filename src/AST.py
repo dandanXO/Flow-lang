@@ -1,6 +1,48 @@
-from Constants.AST import BinaryOperation
+from enum import Enum, unique
 from llvmlite import ir
 from Constants.Tokens import TokenList
+
+@unique
+class BinaryOperation(Enum):
+    Addition = 1
+    Subtract = 2
+    Multiply = 3
+    Divide = 4
+    Remain = 5
+
+    Not = 6
+    Or = 7
+    And = 8
+    Xor = 9
+    Shl = 10
+    Shr = 11
+
+@unique
+class PrimitiveDataType(Enum):
+    void = 0
+    boolean = 1
+    u8 = 2
+    u16 = 3
+    u32 = 4
+    u64 = 5
+    i8 = 6
+    i16 = 7
+    i32 = 8
+    i64 = 9
+    f32 = 10
+    f64 = 11
+    string = 12
+    pointer = 13
+    
+@unique
+class ValueType(Enum):
+    null = 0
+    number = 1
+    pointer = 2
+    string = 3
+    boolean = 4
+    tuple = 5
+    array = 6
 
 class ASTNodeBase:
     def __init__(self, name, pos):
@@ -33,21 +75,21 @@ class VariableExpression(ASTNodeBase):
         return None
 
 class BinOpExpression(ASTNodeBase):
-    def __init__(self, op, expA, expB, pos):
+    def __init__(self, op, lhs, rhs, pos):
         super().__init__("Binary Operation Expression Node", pos)
         self.op = op
-        self.expA = expA
-        self.expB = expB
+        self.lhs = lhs
+        self.rhs = rhs
     def __str__(self):
         return "{} @ ({}, {})\n\t   \
         Operator => {}\n\t  \
-        ExpressionA => {}\n\t   \
-        ExpressionB => {}\n\t   \
-        ".format(self.name, self.line, self.col, self.op, self.expA, self.expB)
+        LHS => {}\n\t   \
+        RHS => {}\n\t   \
+        ".format(self.name, self.line, self.col, self.op, self.lhs, self.rhs)
     def codegen(self, module, builder):
         # TODO: NDY
-        lhs = self.expA.codegen()
-        rhs = self.expB.codegen()
+        lhs = self.lhs.codegen()
+        rhs = self.rhs.codegen()
 
         if not(lhs) or not(rhs):
             return None
@@ -104,12 +146,12 @@ class FunctionHeaderExpression(ASTNodeBase):
         return ir.FunctionType(self.ret_type, self.parms)
 
 class ScopeExpression(ASTNodeBase):
-    def __init__(self, child, ident, pos):
+    def __init__(self, childs, ident, pos):
         super().__init__("Scope Expression Node", pos)
-        self.childs = child
+        self.childs = childs
         self.ident = ident
     def __str__(self):
-        return "{} @ ({}, {})\n\t\t\tIdentifier => {}\n\t\t\tChild => {}\
+        return "{} @ ({}, {})\n\t\t\tIdentifier => {}\n\t\t\tChilds => {}\
         ".format(self.name, self.line, self.col, self.ident, self.childs)
     def codegen(self, module, builder):
         #TODO: NDY
@@ -143,7 +185,7 @@ class ReturnExpression(ASTNodeBase):
             builder.ret(self.expr.codegen(builder))
         else:
             builder.ret_void()
-        
+
 if __name__ == '__main__':
     mod = ir.Module(name=__file__)
     fh = FunctionHeaderExpression('main', [], ir.VoidType(), False, (0,0))
