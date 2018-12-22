@@ -1,32 +1,11 @@
-from Constants.Tokens import TokenList
+from tokens import TokenList, Token, TokenDataType
 import re
 from Errors import SyntaxError
-from enum import Enum, unique
 
-dec_pattern = r'^(0|[^\s0.])\d+$' 
-float_pattern = r'^([0-9]*)\.[0-9]+$' 
-hex_pattern = r'^0x[0-9a-fA-F]+$'
+dec_pattern = r'\d+'
+float_pattern = r'(?:\d+)?(?:\.?\d*)'
+hex_pattern = r'0x[0-9a-fA-F]*'
 bin_pattern = r'\b([10]+)b\b'
-
-@unique
-class TokenDataType(Enum):
-    none = 0
-    integer = 1
-    floating = 2
-    string = 3
-
-class Token:
-    def __init__(self, id, pos, kind=TokenDataType.none, data=None):
-        self.id = id
-        self.pos = pos
-        self.kind = kind
-        self.data = data
-    
-    def __str__(self):
-        data_msg = ""
-        if self.kind != TokenDataType.none:
-            data_msg = ' with data "' + str(self.data) + '"'
-        return 'Token ' + self.id.value + data_msg + ' at ' + str(self.pos) + ''
 
 class Lexer:
     def __init__(self, code=None):
@@ -107,7 +86,7 @@ class Lexer:
         self.lookup[','] = TokenList.sym_comma
         
         #self.lookup['=>'] = TokenList.sym_flow
-        #self.lookup['?'] = TokenList.sym_question
+        #self.lookup['?'] = TokenList.sym_
     
     def SetInput(self, code):
         self.cursor = 0
@@ -134,12 +113,6 @@ class Lexer:
             self.col = 1
         self.cursor += 1
         return c
-
-    def Lex(self):
-        toks = []
-        while not self.Ended():
-            toks.append(self.GetNextToken())
-        return toks
     
     def GetNextToken(self):
         #Skip comment
@@ -215,43 +188,26 @@ class Lexer:
 
     def GetNumbericToken(self):
         num_text = ''
-        dec_filter = re.compile(dec_pattern)
-        float_filter = re.compile(float_pattern)
-        hex_filter = re.compile(hex_pattern)
-        bin_filter = re.compile(bin_pattern)
+        dec_checker = re.compile(dec_pattern)
+        float_checker = re.compile(float_pattern)
 
         while not self.Ended():
             if (not str.isalnum(self.code[self.cursor]) and self.code[self.cursor] != '.') or str.isspace(self.code[self.cursor]):
                 break
             num_text += self.NextChar()
 
-        if float_filter.match(num_text):
-            # it is a floating
+        if float_checker.match(num_text):
             try:
                 return Token(TokenList.float_literal, self.GetPackedPos(len(num_text)), TokenDataType.floating, float(num_text))
             except ValueError:
                 raise SyntaxError('Fail to fetch a float from text: "{}"'.format(num_text), self.GetPackedPos(len(num_text)))  
-        elif dec_filter.match(num_text):
+        elif dec_checker.match(num_text):
             # it is a decimal number
             try:
-                # try to convert decimal into integer
+                # try to convert num_text to a integer
                 return Token(TokenList.int_literal, self.GetPackedPos(len(num_text)), TokenDataType.integer, int(num_text, 10))
             except ValueError:
                 raise SyntaxError('Fail to fetch a integer from text: "{}"'.format(num_text), self.GetPackedPos(len(num_text)))  
-        elif hex_filter.match(num_text):
-            # it is a heximal number
-            try:
-                # attempt to convert heximal into integer
-                return Token(TokenList.int_literal, self.GetPackedPos(len(num_text)), TokenDataType.integer, int(num_text, 16))
-            except ValueError:
-                raise SyntaxError('Fail to fetch a integer from text: "{}"'.format(num_text), self.GetPackedPos(len(num_text))) 
-        elif bin_filter.match(num_text):
-            # it is a binary number        
-            try:
-                # attempt to convert binary into integer
-                return Token(TokenList.int_literal, self.GetPackedPos(len(num_text)), TokenDataType.integer, int(num_text[:-1], 2))
-            except ValueError:
-                raise SyntaxError('Fail to fetch a integer from text: "{}"'.format(num_text), self.GetPackedPos(len(num_text))) 
         else:
             raise SyntaxError('Unknown type of number: "{}"'.format(num_text), self.GetPackedPos(len(num_text)))
 

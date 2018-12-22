@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from Constants.Paths import DEFAULT_PROJECT_ROOT, DEFAULT_PROJECT_FILE
+from paths import DEFAULT_PROJECT_ROOT, DEFAULT_PROJECT_FILE
 
 
 if __name__ == '__main__':

@@ -18,7 +18,6 @@ class TokenList(Enum):
     kw_false = 'false'
     kw_while = 'while'
     kw_return = 'return'
-    kw_scope = 'scope' #not yet implemented
     # Types
     pt_let = 'let'
     pt_bool = 'bool'
@@ -78,3 +77,23 @@ class TokenList(Enum):
     str_literal = 'StringLiteral'
     float_literal = 'FloatLiteral'
     int_literal = 'IntegerLiteral'
+
+@unique
+class TokenDataType(Enum):
+    none = 0
+    integer = 1
+    floating = 2
+    string = 3
+
+class Token:
+    def __init__(self, id, pos, kind=TokenDataType.none, data=None):
+        self.id = id
+        self.pos = pos
+        self.kind = kind
+        self.data = data
+    
+    def __str__(self):
+        data_msg = ""
+        if self.kind != TokenDataType.none:
+            data_msg = ' with data "' + str(self.data) + '"'
+        return 'Token ' + self.id.value + data_msg + ' at ' + str(self.pos) + ''

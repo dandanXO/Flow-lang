@@ -1,5 +1,5 @@
-from Constants.Tokens import TokenList
-from Lexer import Lexer, Token
+from tokens import TokenDataType, TokenList
+from Lexer import Lexer
 
 
 class Parser:
