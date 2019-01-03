@@ -1,12 +1,23 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, FileType
 from paths import DEFAULT_PROJECT_ROOT, DEFAULT_PROJECT_FILE
 
+VERSION = 'v0'
 
 if __name__ == '__main__':
-    ap = ArgumentParser(description='Flow Programming Language Compiler')
-    #actions
-    ap.add_argument('action', choices=['create', 'build', 'clean'])
-    ap.add_argument('-root', help='Redirect PROJECT_ROOT to target directory', default=DEFAULT_PROJECT_ROOT)
-    ap.add_argument('-proj', help='Redirect CONFIG_FILE to target path', default=DEFAULT_PROJECT_FILE)
-    ap.add_argument('-emit-llvm', help='Emit LLVM IR')
-    args = ap.parse_args()
+    ap = ArgumentParser(description='Flow Language Compiler ' + VERSION)
+    #optional
+    ap.add_argument('files', nargs='*', help='Source code files', type=FileType('r'))
+    ap.add_argument('-emit-llvm', help='Output LLVM IR code', action='store_true')
+    ap.add_argument('-emit-processed', help='Output preprocessed code', action='store_true')
+    args = vars(ap.parse_args())
+    print(args)
+    #if no file given
+    if len(args['files']) == 0:
+        print('No input files.')
+        ap.print_help()
+        exit()
+    
+    
+    
+
+    

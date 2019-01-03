@@ -34,7 +34,7 @@ class TokenList(Enum):
     # Operators
     sym_not = '!'
     sym_not_equal = '!='
-    sym_at = '@'
+    # sym_at = '@'
     sym_hash = '#'
     sym_dollar = '$'
     sym_remainder = '%'

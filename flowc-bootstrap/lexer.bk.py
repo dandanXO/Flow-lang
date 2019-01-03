@@ -2,20 +2,16 @@ from tokens import TokenList, Token, TokenDataType
 import re
 
 dec_pattern = r'\d+'
-float_pattern = r'(?:\d+)?\.(\d+)'
+float_pattern = r'(?:\d+)?(?:\.?\d*)'
 hex_pattern = r'0x[0-9a-fA-F]*'
 bin_pattern = r'\b([10]+)b\b'
 
 class Lexer:
-    """
-        Lexer
-        Generate token from code
-    """
-    def __init__(self, file):
-        self.fp = file
+    def __init__(self, code):
+        self.code = code
+        self.cursor = 0
         self.line = 1
         self.col = 1
-        self.curr_char = str()
 
         self.lookup = {}
         #Keywords
@@ -91,152 +87,169 @@ class Lexer:
         #self.lookup['=>'] = TokenList.sym_flow
         #self.lookup['?'] = TokenList.sym_
 
-    # Destructor
-    def __del__(self):
-        self.fp.close()
+    def Ended(self):
+        return True if self.cursor >= len(self.code)-1 else False
 
-    def reachedEnd(self):
-        return True if self.curr_char == '' else False
-
-    def nextChar(self):
+    def NextChar(self):
         """
-        Get next character from file
+        Get next character from the code
         return next character
         return 0 when no more character left
 
         """
-        c = self.fp.read(1)
-        self.curr_char = c
-        #reached EOF
-        if c == '':
-            return c
+        if self.Ended():
+            return 0
+        c = self.code[self.cursor]
         self.col += 1
-        #if it is newline
         if c == '\n':
             self.line += 1
             self.col = 1
+        self.cursor += 1
         return c
-
-    def getNextToken(self):
-        self.nextChar()
+    
+    def GetNextToken(self):
         #Skip comment
-        self.skipIfNeeded()
+        while self.SkipCommentIfNeeded():
+            # while current character is space
+            while str.isspace(self.code[self.cursor]) or self.code[self.cursor] == '\n':
+                self.NextChar()
+                
+        #Skip spaces
+        while str.isspace(self.code[self.cursor]) or self.code[self.cursor] == '\n':
+            self.NextChar()
+
+        #Detect EOF
+        if self.Ended() or self.code[self.cursor] == '\0':
+            return None
+        
         #if it is a alphabit character or a underscore
-        if str.isalpha(self.curr_char) or self.curr_char == '_':
-            return self.getIdentifierToken()
+        if str.isalpha(self.code[self.cursor]) or self.code[self.cursor] == '_':
+            return self.GetIdentifierToken()
 
         #if it is a number
-        if str.isnumeric(self.curr_char):
-            return self.getNumbericToken()
+        if str.isnumeric(self.code[self.cursor]):
+            return self.GetNumbericToken()
         
         #if it is a symbol
-        if not str.isalnum(self.curr_char) and self.curr_char != '_':
+        if not str.isalnum(self.code[self.cursor]) and self.code[self.cursor] != '_':
             # if it is a quote
-            if self.curr_char == '\"' or self.curr_char == '\'':
-                return self.getStringToken()
-            elif self.curr_char != '':
+            if self.code[self.cursor] == '\"' or self.code[self.cursor] == '\'':
+                return self.GetStringToken()
+            else:
                 return self.GetSymbolToken()
-        #if none of them match, return None
-        return None
     
-    def skipIfNeeded(self):
+    def SkipCommentIfNeeded(self):
         # if it is a space, that mean we have to skip it
-        while not self.reachedEnd() and str.isspace(self.curr_char):
-            self.nextChar()
-        while self.curr_char == '\n' and not self.reachedEnd():
-            self.nextChar()
-    
-    def getCurrPos(self, offset=0):
-        col = self.col-offset-1
-        return (self.line, 1 if col < 1 else col)
+        if str.isspace(self.code[self.cursor]) or self.code[self.cursor] == '\n':
+            return True
+        # if it is not what we looking for, then return false
+        if self.code[self.cursor] != '/':
+            return False
 
-    def getIdentifierToken(self):
-        ident = str()
+        unsure_symbol = ''
+        #collect symbols
+        while not self.Ended():
+            if str.isspace(self.code[self.cursor]) \
+            or str.isalnum(self.code[self.cursor]):
+                break
+            unsure_symbol += self.NextChar()
+        
+        # if that is a single-line comment
+        if unsure_symbol == '//':
+            # collect and skipping the comment
+            while self.code[self.cursor] != '\n' and not self.Ended():
+                self.NextChar()
+            return True
+        return False
+    
+    def GetPackedPos(self, offset=0):
+        return (self.line, self.col-offset)
+
+    def GetIdentifierToken(self):
+        ident = ''
         # collect identifier
         # while (Not ended) and (not symbol except '_') 
-        while not self.reachedEnd() \
-        and (str.isalnum(self.curr_char) or self.curr_char == '_'):
-            ident += self.curr_char
-            self.nextChar()
+        while not self.Ended() \
+        and (str.isalnum(self.code[self.cursor]) or self.code[self.cursor] == '_'):
+            ident += self.NextChar()
 
         #if it is in the lookup list
         if ident in self.lookup:
-            return Token(self.lookup[ident], self.getCurrPos(len(ident)))
+            return Token(self.lookup[ident], self.GetPackedPos())
         #it is just a identifer 
-        return Token(TokenList.identifier, self.getCurrPos(len(ident)), TokenDataType.string, ident)
+        return Token(TokenList.identifier, self.GetPackedPos(), TokenDataType.string, ident)
 
-    def getNumbericToken(self):
-        num_text = str()
+    def GetNumbericToken(self):
+        num_text = ''
         dec_checker = re.compile(dec_pattern)
         float_checker = re.compile(float_pattern)
 
-        while not self.reachedEnd():
-            if (not str.isalnum(self.curr_char) and self.curr_char != '.') or str.isspace(self.curr_char):
+        while not self.Ended():
+            if (not str.isalnum(self.code[self.cursor]) and self.code[self.cursor] != '.') or str.isspace(self.code[self.cursor]):
                 break
-            num_text += self.curr_char
-            self.nextChar()
-        print(self.curr_char)
+            num_text += self.NextChar()
 
         if float_checker.match(num_text):
             try:
-                return Token(TokenList.float_literal, self.getCurrPos(len(num_text)), TokenDataType.floating, float(num_text))
+                return Token(TokenList.float_literal, self.GetPackedPos(len(num_text)), TokenDataType.floating, float(num_text))
             except ValueError:
-                raise SyntaxError('Fail to fetch a float from text: "{}"'.format(num_text), self.getCurrPos(len(num_text)))  
+                raise RuntimeError('Fail to fetch a float from text: "{}"'.format(num_text), self.GetPackedPos(len(num_text)))  
         elif dec_checker.match(num_text):
             # it is a decimal number
             try:
                 # try to convert num_text to a integer
-                return Token(TokenList.int_literal, self.getCurrPos(len(num_text)), TokenDataType.integer, int(num_text, 10))
+                return Token(TokenList.int_literal, self.GetPackedPos(len(num_text)), TokenDataType.integer, int(num_text, 10))
             except ValueError:
-                raise SyntaxError('Fail to fetch a integer from text: "{}"'.format(num_text), self.getCurrPos(len(num_text)))  
+                raise RuntimeError('Fail to fetch a integer from text: "{}"'.format(num_text), self.GetPackedPos(len(num_text)))  
         else:
-            raise SyntaxError('Unknown type of number: "{}"'.format(num_text), self.getCurrPos(len(num_text)))
+            raise RuntimeError('Unknown type of number: "{}"'.format(num_text), self.GetPackedPos(len(num_text)))
 
-    def getStringToken(self):
-        text = str()
-        quote = self.curr_char
+    def GetStringToken(self):
+        text = ''
+        quote = self.code[self.cursor]
 
-        while not self.reachedEnd():
-            current = self.nextChar()
-            if self.curr_char != quote:
+        while(not self.Ended()):
+            current = self.NextChar()
+
+            if self.code[self.cursor] != quote:
                 if current == '\\':
-                    seek = self.nextChar()
-                    if seek == 'n':
-                        current = '\n'
-                    if seek == 'r':
-                        current = '\r'
-                    if seek == '0':
-                        current = '\0'
-                    if seek == 't':
-                        current = '\t'
+                    seek = self.NextChar()
+                    simple_match = {'n':'\n',
+                     'r':'\r', 
+                     '0':'\0', 
+                     't':'\t', 
+                     '\\':seek, 
+                     '\'':seek, 
+                     '"':seek
+                     }
+                     # buggy
+                    current = simple_match[seek]
                 text += current
             else:
                 break
         return Token(TokenList.str_literal, (self.line, self.col - len(text)), TokenDataType.string, text)    
 
     def GetSymbolToken(self):
-        unsure_symbol = str()
-        single = self.curr_char
+        unsure_symbol = ''
         #collect symbol
-        while not self.reachedEnd():
-            if str.isspace(self.curr_char) or str.isalnum(self.curr_char):
+        while not self.Ended():
+            if str.isspace(self.code[self.cursor]) or str.isalnum(self.code[self.cursor]):
                 break
-            unsure_symbol += self.curr_char
-            self.nextChar()
+            unsure_symbol += self.NextChar()
+        
         #if we got a unknown symbol
         if not (unsure_symbol in self.lookup):
             #try search with single symbol
+            single = self.code[self.cursor]
             if not (single in self.lookup):
-                raise RuntimeError("Syntax Error! Unknown symbol: {} At line {}".format(single.encode('utf-8'), self.getCurrPos()))
+                raise RuntimeError("Unknown symbol: {}".format(single.encode('utf-8')), self.GetPackedPos())
             else:
                 unsure_symbol = single
-        return Token(self.lookup[unsure_symbol], self.getCurrPos())
-
+        return Token(self.lookup[unsure_symbol], self.GetPackedPos())
 
 if __name__ == '__main__':
-    lex = Lexer(open('test/lexer.text.flo', 'r', encoding='utf-8'))
-
-    tok = lex.getNextToken()
-    while tok != None:
+    lex = Lexer(open('lexer.text.flo', 'r', encoding='utf-8').read())
+    
+    while not lex.Ended():
+        tok = lex.GetNextToken()
         print(tok)
-        tok = lex.getNextToken()
