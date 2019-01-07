@@ -6,6 +6,7 @@ class TokenList(Enum):
     kw_nil = 'nil'
     kw_for = 'for'
     kw_in = 'in'
+    kw_loop = 'loop'
     kw_continue = 'continue'
     kw_break = 'break'
     kw_if = 'if'
@@ -18,8 +19,16 @@ class TokenList(Enum):
     kw_false = 'false'
     kw_while = 'while'
     kw_return = 'return'
+    kw_filter = 'filter'
+    kw_static = 'static'
+    kw_const = 'const'
+    kw_struct = 'struct'
+    kw_func = 'func'
+    kw_stack = '$tack'
+    kw_stack_size = '$ize'
     # Types
     pt_let = 'let'
+    pt_ptr = 'ptr'
     pt_bool = 'bool'
     pt_u8 = 'u8'
     pt_u16 = 'u16'
@@ -71,12 +80,29 @@ class TokenList(Enum):
     sym_greater_equal = '>='
     sym_shift_right = '>>'
     sym_comma = ','
+    sym_range = '~'
 
     identifier = 'Identifier'
     # Literals
     str_literal = 'StringLiteral'
     float_literal = 'FloatLiteral'
     int_literal = 'IntegerLiteral'
+
+PTYPE_TOKENS = [
+    TokenList.pt_let, 
+    TokenList.pt_ptr,
+    TokenList.pt_bool, 
+    TokenList.pt_double, 
+    TokenList.pt_float, 
+    TokenList.pt_i8, 
+    TokenList.pt_i16, 
+    TokenList.pt_i32, 
+    TokenList.pt_i64, 
+    TokenList.pt_u8,
+    TokenList.pt_u16,
+    TokenList.pt_u32,
+    TokenList.pt_u64
+]
 
 @unique
 class TokenDataType(Enum):

@@ -10,6 +10,8 @@ class Lexer:
     """
         Lexer
         Generate token from code
+        =========================
+        file    Processed code file object
     """
     def __init__(self, file):
         self.fp = file
@@ -18,10 +20,12 @@ class Lexer:
         self.curr_char = str()
 
         self.lookup = {}
+
         #Keywords
         self.lookup['nil'] = TokenList.kw_nil
         self.lookup['for'] = TokenList.kw_for
         self.lookup['in'] = TokenList.kw_in
+        self.lookup['loop'] = TokenList.kw_loop
         self.lookup['continue'] = TokenList.kw_continue
         self.lookup['break'] = TokenList.kw_break
         self.lookup['if'] = TokenList.kw_if
@@ -34,8 +38,15 @@ class Lexer:
         self.lookup['false'] = TokenList.kw_false
         self.lookup['while'] = TokenList.kw_while
         self.lookup['return'] = TokenList.kw_return
+        self.lookup['filter'] = TokenList.kw_filter
+        #self.lookup['func'] = TokenList.kw_func
+        # self.lookup['static'] = TokenList.kw_static
+        # self.lookup['const'] = TokenList.kw_const
+        # self.lookup['struct'] = TokenList.kw_struct
+
         #Primitive types
         self.lookup['let'] = TokenList.pt_let
+        self.lookup['ptr'] = TokenList.pt_ptr
         self.lookup['bool'] = TokenList.pt_bool
         self.lookup['u8'] = TokenList.pt_u8
         self.lookup['u16'] = TokenList.pt_u16
@@ -47,10 +58,10 @@ class Lexer:
         self.lookup['i64'] = TokenList.pt_i64
         self.lookup['f32'] = TokenList.pt_float
         self.lookup['f64'] = TokenList.pt_double
+
         #Symbols
         self.lookup['!'] = TokenList.sym_not
         self.lookup['!='] = TokenList.sym_not_equal
-        #self.lookup['@'] = TokenList.sym_at
         self.lookup['#'] = TokenList.sym_hash
         #self.lookup['$'] = TokenList.sym_dollar
         self.lookup['%'] = TokenList.sym_remainder
@@ -87,9 +98,10 @@ class Lexer:
         self.lookup['>='] = TokenList.sym_greater_equal
         self.lookup['>>'] = TokenList.sym_shift_right
         self.lookup[','] = TokenList.sym_comma
-        
+        self.lookup['~'] = TokenList.sym_range
+        self.lookup['~='] = TokenList.sym_included_range
         #self.lookup['=>'] = TokenList.sym_flow
-        #self.lookup['?'] = TokenList.sym_
+        #self.lookup['?'] = TokenList.sym_not_sure
 
     # Destructor
     def __del__(self):
@@ -181,14 +193,14 @@ class Lexer:
             try:
                 return Token(TokenList.float_literal, self.getCurrPos(len(num_text)), TokenDataType.floating, float(num_text))
             except ValueError:
-                raise SyntaxError('Fail to fetch a float from text: "{}"'.format(num_text), self.getCurrPos(len(num_text)))  
+                raise SyntaxError('Unable to fetch a float from text: "{}"'.format(num_text), self.getCurrPos(len(num_text)))  
         elif dec_checker.match(num_text):
             # it is a decimal number
             try:
                 # try to convert num_text to a integer
                 return Token(TokenList.int_literal, self.getCurrPos(len(num_text)), TokenDataType.integer, int(num_text, 10))
             except ValueError:
-                raise SyntaxError('Fail to fetch a integer from text: "{}"'.format(num_text), self.getCurrPos(len(num_text)))  
+                raise SyntaxError('Unable to fetch an integer from text: "{}"'.format(num_text), self.getCurrPos(len(num_text)))  
         else:
             raise SyntaxError('Unknown type of number: "{}"'.format(num_text), self.getCurrPos(len(num_text)))
 

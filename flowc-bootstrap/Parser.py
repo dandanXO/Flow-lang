@@ -3,11 +3,11 @@ from Lexer import Lexer
 
 
 class Parser:
-    def __init__(self, symbols):
-        self.module = None
+    def __init__(self, lexer, env):
+        self.lexer = lexer
         self.prev_token = None
         self.state = None
-        self.symbols = symbols
+        self.env = env
         
     def Parse(self, lexer):
         while not lexer.Ended():

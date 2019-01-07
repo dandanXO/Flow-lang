@@ -1,7 +1,7 @@
 from AST import *
 
 class ValueExpression(ASTBase):
-    def __init__(self, val, type, pos, signed=True):
+    def __init__(self, pos, val, type, signed=True):
         super().__init__("Value Expression", pos)
         self.value = val
         self.type = type

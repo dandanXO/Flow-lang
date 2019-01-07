@@ -1,13 +1,15 @@
 from AST import *
 
 class VariableExpression(ASTBase):
-    def __init__(self, ident, val_expr, pos):
+    def __init__(self, pos, name, type, initializer=None):
         super().__init__("Variable Expression", pos)
-        self.ident = ident
-        self.val_expr = val_expr
+        self.name = name
+        self.type = type
+        self.init_expr = initializer
 
     def __str__(self):
-        return super().__str__() + "Identifier => {}\n\tValue Expression => {}".format(self.ident, self.val_expr)
+        return super().__str__() + "Name => {}\n\tVariable type => {}\n\tInitializer => {}"\
+        .format(self.name, self.type, self.init_expr)
 
     def GrowTree(self, module, builder, resources):
         # TODO: create variable lookup table
