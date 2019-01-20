@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, FileType
-from paths import DEFAULT_PROJECT_ROOT, DEFAULT_PROJECT_FILE
+from Defaults import DEFAULT_PROJECT_ROOT, DEFAULT_PROJECT_FILE
 
 VERSION = 'v0'
 
@@ -16,8 +16,3 @@ if __name__ == '__main__':
         print('No input files.')
         ap.print_help()
         exit()
-    
-    
-    
-
-    

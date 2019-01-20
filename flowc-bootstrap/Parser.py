@@ -15,7 +15,8 @@ class Parser:
 
             print(token)
 
-    def ParseVariable(self):
+    def ParseDeclaration(self):
         pass
+    
     
 

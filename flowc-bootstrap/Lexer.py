@@ -246,7 +246,7 @@ class Lexer:
 
 
 if __name__ == '__main__':
-    lex = Lexer(open('test/lexer.text.flo', 'r', encoding='utf-8'))
+    lex = Lexer(open('testcode/lexer.text.flo', 'r', encoding='utf-8'))
 
     tok = lex.getNextToken()
     while tok != None:
