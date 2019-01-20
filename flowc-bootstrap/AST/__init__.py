@@ -1,6 +1,6 @@
 from llvmlite import ir
 from enum import Enum, unique
-from tokens import TokenList
+from Tokens import TokenList
 
 @unique
 class BinaryOperation(Enum):
