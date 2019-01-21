@@ -13,12 +13,11 @@ class Lexer:
         =========================
         file    Processed code file object
     """
-    def __init__(self, text):
-        self.src = iter(text)
-        self.curr_line = ''
-        self.line_num = 0
-        self.col = 0
-        self.curr_char = ''
+    def __init__(self, file):
+        self.fp = file
+        self.line = 1
+        self.col = 1
+        self.curr_char = str()
 
         self.lookup = {}
 
@@ -100,48 +99,39 @@ class Lexer:
         self.lookup['>>'] = TokenList.sym_shift_right
         self.lookup[','] = TokenList.sym_comma
         self.lookup['~'] = TokenList.sym_range
+        self.lookup['~='] = TokenList.sym_included_range
         #self.lookup['=>'] = TokenList.sym_flow
         #self.lookup['?'] = TokenList.sym_not_sure
 
-    def __iter__(self):
-        return self
+    # Destructor
+    def __del__(self):
+        self.fp.close()
 
-    def __next__(self):
-        tok = self.getNextToken()
-        if tok == None:
-            raise StopIteration
-        return tok
     def reachedEnd(self):
         return True if self.curr_char == '' else False
 
-    
     def nextChar(self):
         """
-        Get next character from text
+        Get next character from file
         return next character
-        return empty string when no more character left
+        return 0 when no more character left
 
         """
-        if self.col >= len(self.curr_line):
-            #new line
-            try:
-                self.curr_line = next(self.src)
-            except StopIteration:
-                #eof
-                self.curr_char = ''
-                return ''
-            #got new line
-            self.line_num += 1
-            self.col = 0
-        
-        self.curr_char = self.curr_line[self.col]
+        c = self.fp.read(1)
+        self.curr_char = c
+        #reached EOF
+        if c == '':
+            return c
         self.col += 1
-        return self.curr_char
-        
+        #if it is newline
+        if c == '\n':
+            self.line += 1
+            self.col = 1
+        return c
 
     def getNextToken(self):
         self.nextChar()
-        #Skip spaces
+        #Skip comment
         self.skipIfNeeded()
         #if it is a alphabit character or a underscore
         if str.isalpha(self.curr_char) or self.curr_char == '_':
@@ -168,9 +158,9 @@ class Lexer:
         while self.curr_char == '\n' and not self.reachedEnd():
             self.nextChar()
     
-    def getPosRange(self, strlen):
-        pos = self.col - strlen -1
-        return (self.line_num, pos, self.col-2)
+    def getCurrPos(self, offset=0):
+        col = self.col-offset-1
+        return (self.line, 1 if col < 1 else col)
 
     def getIdentifierToken(self):
         ident = str()
@@ -183,9 +173,9 @@ class Lexer:
 
         #if it is in the lookup list
         if ident in self.lookup:
-            return Token(self.lookup[ident], self.getPosRange(len(ident)))
+            return Token(self.lookup[ident], self.getCurrPos(len(ident)))
         #it is just a identifer 
-        return Token(TokenList.identifier, self.getPosRange(len(ident)), TokenDataType.string, ident)
+        return Token(TokenList.identifier, self.getCurrPos(len(ident)), TokenDataType.string, ident)
 
     def getNumbericToken(self):
         num_text = str()
@@ -200,15 +190,19 @@ class Lexer:
         print(self.curr_char)
 
         if float_checker.match(num_text):
-            # if it is a floating number
-            return Token(TokenList.float_literal, self.getPosRange(len(num_text)), TokenDataType.floating, num_text)
-        
+            try:
+                return Token(TokenList.float_literal, self.getCurrPos(len(num_text)), TokenDataType.floating, float(num_text))
+            except ValueError:
+                raise SyntaxError('Unable to fetch a float from text: "{}"'.format(num_text), self.getCurrPos(len(num_text)))  
         elif dec_checker.match(num_text):
             # it is a decimal number
-            return Token(TokenList.int_literal, self.getPosRange(len(num_text)), TokenDataType.integer, int(num_text, 10))
-
+            try:
+                # try to convert num_text to a integer
+                return Token(TokenList.int_literal, self.getCurrPos(len(num_text)), TokenDataType.integer, int(num_text, 10))
+            except ValueError:
+                raise SyntaxError('Unable to fetch an integer from text: "{}"'.format(num_text), self.getCurrPos(len(num_text)))  
         else:
-            raise SyntaxError('Unknown type of number: "{}"'.format(num_text), self.getPosRange(len(num_text)))
+            raise SyntaxError('Unknown type of number: "{}"'.format(num_text), self.getCurrPos(len(num_text)))
 
     def getStringToken(self):
         text = str()
@@ -230,7 +224,7 @@ class Lexer:
                 text += current
             else:
                 break
-        return Token(TokenList.str_literal, (self.curr_line, self.col - len(text)), TokenDataType.string, text)    
+        return Token(TokenList.str_literal, (self.line, self.col - len(text)), TokenDataType.string, text)    
 
     def GetSymbolToken(self):
         unsure_symbol = str()
@@ -245,14 +239,16 @@ class Lexer:
         if not (unsure_symbol in self.lookup):
             #try search with single symbol
             if not (single in self.lookup):
-                raise RuntimeError("Syntax Error! Unknown symbol: {} At line {}".format(single.encode('utf-8'), self.getPosRange()))
+                raise RuntimeError("Syntax Error! Unknown symbol: {} At line {}".format(single.encode('utf-8'), self.getCurrPos()))
             else:
                 unsure_symbol = single
-        return Token(self.lookup[unsure_symbol], self.getPosRange(len(unsure_symbol)))
+        return Token(self.lookup[unsure_symbol], self.getCurrPos())
 
 
 if __name__ == '__main__':
     lex = Lexer(open('testcode/lexer.text.flo', 'r', encoding='utf-8'))
 
-    for tok in lex:
+    tok = lex.getNextToken()
+    while tok != None:
         print(tok)
+        tok = lex.getNextToken()

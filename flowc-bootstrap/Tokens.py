@@ -122,4 +122,4 @@ class Token:
         data_msg = ""
         if self.kind != TokenDataType.none:
             data_msg = ' with data "' + str(self.data) + '"'
-        return 'Token ' + self.id.value + data_msg + ' at ' + str(self.pos) + ''
+        return 'Token {} {} at line {} : from col {} to {}'.format(self.id.value, data_msg, self.pos[0], self.pos[1], self.pos[2])
