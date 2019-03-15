@@ -70,4 +70,4 @@ TokenOperators = (\
 TokenShapeless = ('IDENTIFIER', 'STR_LITERAL', 'FLOAT_LITERAL', 'INT_LITERAL')
 
 # Contain all tokens
-TokenList = TokenReserveds + TokenTypes + TokenOperators + TokenShapeless
+TokenList = list(TokenReserveds) + list(TokenTypes) + TokenOperators + TokenShapeless
