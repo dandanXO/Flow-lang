@@ -1,7 +1,41 @@
+# This is a comment, and it shouldn't consider as a token!
 
+return # comment after token
 
-return
+nil for in loop continue break
+if else not or xor and true false while
+return match const struct func stack let
+ptr bool u8 u16 u32 u64 i8 i16 i32 i64
+f32 f64
 
-else
+#Identifiers
+id skdgfv
 
+ksjhdgc
 
+skdhjf kjsdfhsj
+
+#Operator
+! != @
+$ % %= ^
+^= & &= *
+*= ( ) -
+-- -= + ++
++= = ++ [
+] { } |
+|= / /= ;
+< <= << <<=
+> >= >> >>=
+, ~
+
+'a'
+
+#'asdsg'
+
+"ABC"
+
+"a"
+
+'
+
+"
