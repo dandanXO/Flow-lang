@@ -9,7 +9,7 @@ You can compile Flow code to a excutable file or run it on interpreter, that mea
 Thats impressive isn't it?
 
 **Bootstrapping**
-The bootstrap compiler will be written in pure python, with several python libraries. The goal is self-lifting. 
+The bootstrap compiler will be written in pure python, with several python libraries. The goal here is self-lifting. 
 
  - [ ] Multiple file compilation
  - [ ] C FFI
@@ -19,19 +19,23 @@ The bootstrap compiler will be written in pure python, with several python libra
 
 2. Compiling <-> Interpreting
 
-## Architecture
+## Compiler Architecture
 **Preprocessing**
 
-Generate source code base on the environment variables.
+Purify source code and resovle preprocessing variables
 Workflow:
 1. Gathering host infomation(platform, target, current directory, output directory, passed arguments)
 2. Build ```env``` table
 3. Resolve external project(git, ftp)
-**Lexing**
-Extracting tokens from processed source code
 
-****
-**AST Builder**
+**Lexer**
+
+Extracting tokens from processed source code using PLY
+
+
+**Parser**
+
+Generate AST from stream of tokens using PLY
 
 **Code Generation**
 
@@ -39,8 +43,8 @@ Extracting tokens from processed source code
 
 A flexible standard library that constantly update itself.
 
-The compiler will check if there is a update of SSL functions everytime you compiling SSL's code, and will update the SSL functions you currently have.
+Everytime you compiling SSL's code, and it will update the SSL functions you currently have.
 
-Protocol of SSL functions(function name, return type, parameters) will be unified by Flow Language editors. For improving the SSL, users can write their own version of SSL functions, and submit it to the SSL server, then the server will pick the most efficient one and replace currently use one with the faster one. Basiclly, this is a competetive way to improve the quality of the SSL.
+Protocol of SSL functions(function name, return type, parameters) will be unified by Flow Language community. For improving SSL, users can write their own version of SSL functions, and submit it to the SSL Repository, then admins will pick the most efficient one that users submitted, and patch it into next SSL update. Simplily, this is a competetive way to improve the quality of the SSL.
 
-The library is fully open-source.
+The compiler and all libraries is fully open-source.
