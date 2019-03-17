@@ -2,6 +2,15 @@ from Tokens import TokenList, TokenReserveds, TokenOperators
 import ply.lex as plex
 import re
 
+class LexicalError(Exception):
+    def __init__(self, reason, details):
+        self.reason = reason
+        self.details = details
+
+    def __str__(self):
+        return '\n{}\nLexical Error: {}\nCompilation terminated.'.format(self.details, self.reason)
+
+# The lexer class
 class Lexer:
     # plex will use this
     tokens = TokenList
@@ -139,16 +148,30 @@ class Lexer:
     def t_error(self, t):
         illegal_checker = re.compile(r'\'\w{2,}\'')
         single_quote_checker = re.compile(r'\'.*$[^\']')
-        error_msg = 'Undefined token found!'
+        reason = 'Illegal character(s) found!'
         if illegal_checker.match(t.value):
-            error_msg = 'Character literal should not contain more than one characters!'
+            reason = 'Character literal should not contain more than one characters!'
         elif single_quote_checker.match(t.value):
-            error_msg = 'Quote did not paired!'
+            reason = 'Quote did not paired!'
         
-        #print out error message
-        print('\nError: {}\n\n```\n\n{}\n\n```\nin line {} at position {}'.
-            format(error_msg, t.value[:t.value.find('\n')], t.lineno, self.cal_column(t)))
-        exit(-1)
+        #extract the line where error occur
+        error_content = t.lexer.lexdata.split('\n')[t.lineno-1]
+        
+        error_text = t.value[:t.value.find('\n')]
+        error_pos = error_content.find(error_text)
+
+        underline = ['~'] * len(error_content)
+        for i in range(len(error_text)):
+            underline[error_pos+i] = '^'
+        underline = ''.join(underline)
+
+        detail_msg = 'In line {} :\n```\n\n{}\n{}\n\n```'.format(t.lineno, error_content, underline)
+        #submit the error
+        try:
+            raise LexicalError(reason, detail_msg)
+        except LexicalError as e:
+            print(e)
+            exit(-1)
 
     def cal_column(self, tok):
         line_start = self.text.rfind('\n', 0, tok.lexpos) + 1
@@ -157,10 +180,10 @@ class Lexer:
     def print_token(self, t):
         print('Token {} ({}) in line {} at pos {}'.format(t.type, t.value, t.lineno, self.cal_column(t)))
 
-# Unit test
+# Test
 if __name__ == '__main__':
     print('Unit Test: Lexer')
-    with open('testcode/lexer.text.flo', 'r') as f:
+    with open('testcode/lexer.text.flo', 'r', encoding='utf-8') as f:
         test_code = f.read()
 
     #create lexer

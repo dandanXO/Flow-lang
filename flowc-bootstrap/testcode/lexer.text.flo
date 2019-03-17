@@ -32,10 +32,19 @@ $ % %= ^
 
 #'asdsg'
 
-"ABC"
+"ABC" #中文
+
+"中文"
 
 "a"
 
-'
+#empty string and character test
+'' #asda
+"" #sdfsdf
+''
+""
 
-"
+    "ajlksdayvs" 'dfg'
+
+'" Error test passed
+
