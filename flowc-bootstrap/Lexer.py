@@ -1,6 +1,7 @@
-from Tokens import TokenList, TokenReserveds, TokenOperators
+from Tokens import TokenList, TokenReserveds, TokenOperators, TokenShapeless, TokenReserveds
 import ply.lex as plex
 import re
+
 
 class LexicalError(Exception):
     def __init__(self, reason, details):
@@ -15,11 +16,26 @@ class Lexer:
     # plex will use this
     tokens = TokenList
     
-    def __init__(self, text):
+    def __init__(self, text, **args):
         self.text = text
         # Regex
         self.hex_checker = re.compile(r'0x[^\s]([0-9a-f]*|[0-9A-F]*)')
         self.binary_checker = re.compile(r'([10]+)b')
+        self.single_quote_checker = re.compile(r'\'\".*$[^\'\"]')
+        self.illegal_character_checker = re.compile(r'\'\w{2,}\'')
+
+        self.lex = plex.lex(object=self, **args)
+        self.lex.input(self.text)
+        self.lex.lineno = 1
+
+    #change input
+    def input(self, text):
+        self.text = text
+        self.lex.input(text)
+    
+    #bridge of self.lex.token
+    def token(self):
+        return self.lex.token()
     
     def __iter__(self):
         return self.lex.__iter__()
@@ -27,23 +43,28 @@ class Lexer:
     def __next__(self):
         return next(self.lex)
 
-    def build(self, **args):
-        self.lex = plex.lex(object=self, **args)
-        self.lex.input(self.text)
-        self.lex.lineno = 1
-
 ############################################
 #           LEXER DEFINATIONS        
 ############################################
-    #Ignore space and tabs
-    t_ignore = ' \t' 
+
+    #Ignore spaces and tabs
+    t_ignore = ' \t'
+    # treat comment as newline
+    def t_ignore_COMMENT(self, t):
+        r'\#.*'
         
     # Capture string
-    t_STR_LITERAL= r'\"([^\\\n]|(\\.))*?\"'
+    def t_STR_LITERAL(self, t):
+        r'\"([^\\\n]|(\\.))*?\"'
+        t.value = t.value[1:-1]
+        return t
 
     # Capture character
-    t_CHAR_LITERAL = r'\'\w{0,1}\''
-    
+    def t_CHAR_LITERAL(self, t):
+        r'\'([^\\\n]|(\\.))*?\''
+        t.value = t.value[1:-1]
+        return t
+
     #register symbols
     t_SYM_NOT = r'\!'
     t_SYM_NOT_EQUAL = r'\!\='
@@ -87,24 +108,21 @@ class Lexer:
     t_SYM_ASSIGN_SHIFT_RIGHT = r'\>\>\='
     t_SYM_COMMA = r'\,'
     t_SYM_RANGE = r'\~'
-    
-    # treat comment as newline
-    def t_ignore_COMMENT(self, t):
-        r'\#.*'
 
-    #counting newline
+    #Counting newline
     def t_newline(self, t):
         r'\n+'
+        #tracking line number
         t.lexer.lineno += len(t.value)
 
-    # Identifier
+    # Capture identifiers (Only english letters and underscores!)
     def t_IDENTIFIER(self, t):
         r"[_a-zA-Z][\w]*"
-        #change type if it is a reserved word
+        #recognize reserved words
         t.type = TokenReserveds.get(t.value, "IDENTIFIER")
         return t
 
-    # Float literal
+    # Capture float literal
     def t_FLOAT_LITERAL(self, t):
         r'(?:\d+)?\.(\d+)'
         #convert string into float number
@@ -114,7 +132,7 @@ class Lexer:
         except ValueError:
             pass
 
-    #Binary numbers, heximal numbers and decimal numbers
+    # Capture binary numbers, heximal numbers and decimal numbers
     def t_INT_LITERAL(self, t):
         r'(([10]+)b)|(^0x([0-9a-f]+|[0-9A-F]+))|([0-9]+)'
 
@@ -127,14 +145,14 @@ class Lexer:
             except ValueError:
                 pass
         elif self.hex_checker.match(t.value):
-            #heximal number
+            #it is a heximal number
             try:
                 t.value = int(t.value, 16)
                 return t
             except ValueError:
                 pass
         else:
-            #decimal number
+            #it is a decimal number
             # we won't accept numbers that start with zero
             if len(t.value) > 1 and t.value[0] == '0':
                 pass
@@ -144,23 +162,18 @@ class Lexer:
                     return t
                 except ValueError:
                     pass
-    
+
     def t_error(self, t):
-        illegal_checker = re.compile(r'\'\w{2,}\'')
-        single_quote_checker = re.compile(r'\'.*$[^\']')
-        reason = 'Illegal character(s) found!'
-        if illegal_checker.match(t.value):
-            reason = 'Character literal should not contain more than one characters!'
-        elif single_quote_checker.match(t.value):
-            reason = 'Quote did not paired!'
-        
+
+        #try to analysis reason
+        reason = self.analysis_reason(t)
         #extract the line where error occur
         error_content = t.lexer.lexdata.split('\n')[t.lineno-1]
         
         error_text = t.value[:t.value.find('\n')]
         error_pos = error_content.find(error_text)
 
-        underline = ['~'] * len(error_content)
+        underline = [' '] * len(error_content)
         for i in range(len(error_text)):
             underline[error_pos+i] = '^'
         underline = ''.join(underline)
@@ -173,6 +186,15 @@ class Lexer:
             print(e)
             exit(-1)
 
+    def analysis_reason(self, t):
+
+        if self.single_quote_checker.match(t.value):
+            return 'Quote did not paired!'
+        elif self.illegal_character_checker.match(t.value):
+            return 'Character literal should not contain more than one characters!'
+        else:
+            return 'Illegal character(s) found!'
+
     def cal_column(self, tok):
         line_start = self.text.rfind('\n', 0, tok.lexpos) + 1
         return (tok.lexpos - line_start) + 0
@@ -180,15 +202,76 @@ class Lexer:
     def print_token(self, t):
         print('Token {} ({}) in line {} at pos {}'.format(t.type, t.value, t.lineno, self.cal_column(t)))
 
-# Test
+# Unit Testing
 if __name__ == '__main__':
-    print('Unit Test: Lexer')
-    with open('testcode/lexer.text.flo', 'r', encoding='utf-8') as f:
-        test_code = f.read()
+    print('Unit Testing: Lexer\n')
 
     #create lexer
-    lexer = Lexer(test_code)
-    lexer.build()
+    lexer = Lexer('')
+    
+    # Comment
+    print('* Comment --- ', end='')
+    lexer.input('# Test comment here 註釋在這裡')
+    assert lexer.token() == None, 'Failed!'
+    print('Pass')
 
-    for tok in lexer:
-        lexer.print_token(tok)
+    # Identifier
+    print('* Identifier --- ', end='')
+    lexer.input('id')
+    tok = lexer.token()
+    assert tok.type == 'IDENTIFIER' and tok.value == 'id', 'Failed!'
+    print('Pass')
+
+    # Reserved word
+    print('* Reserved words --- ', end='')
+    for rw in list(TokenReserveds.keys()):
+        lexer.input(rw)
+        assert lexer.token().type == TokenReserveds[rw], '{} test failed!'.format(rw)
+    print('Pass')
+
+    # Operators
+    print('* Operators ---', end='')
+    for op in list(TokenOperators.keys()):
+        lexer.input(op)
+        assert lexer.token().type == TokenOperators[op], '{} test failed!'.format(op)
+    print('Pass')
+    
+    # Character
+    print('* Character --- ', end='')
+    test_char = ['0','1','2','3','4','5','6','7','8','9',' ','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','~','!','@','#','$','%','^','&','*','(',')','_','+','-','=','{','[','}',']','|',':',';','\\\"','\\\'','<',',','>','.','?','/']
+    for ch in test_char:
+        lexer.input('\'{}\''.format(ch))
+        tok = lexer.token()
+        assert tok.type == 'CHAR_LITERAL' and tok.value == '{}'.format(ch), '\'{}\' test failed!'.format(ch)
+    print('Pass')
+
+    # Character with special character
+    print('* Special character --- ', end='')
+    test_str = ['\\n', '\\t', "\\\'", '\\\"']
+    for ch in test_str:
+        lexer.input('\'{}\''.format(ch))
+        tok = lexer.token()
+        assert tok.type == 'CHAR_LITERAL' and tok.value == '{}'.format(ch), '\'{}\' test failed!'.format(ch)
+    print('Pass')
+
+    # Empty character
+    print('* Empty character --- ', end='')
+    lexer.input('\'\'')
+    tok = lexer.token()
+    assert tok.type == 'CHAR_LITERAL' and tok.value == '', 'Failed!'
+    print('Pass')
+
+    # String
+    print('* String --- ', end='')
+    lexer.input('\" 0123456789 abcdefghijklmnopqrstuvwxyz~!@#$%^&*()_+-={[}]|:;\\\"\\\'<,>.?/\"')
+    tok = lexer.token()
+    assert tok.type == 'STR_LITERAL', 'Failed!'
+    print('Pass')
+
+    print('* Empty string --- ', end='')
+    lexer.input('\"\"')
+    tok = lexer.token()
+    assert tok.type == 'STR_LITERAL' and tok.value == '', 'Failed!'
+    print('Pass')
+    
+

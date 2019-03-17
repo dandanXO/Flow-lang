@@ -1,6 +1,7 @@
 
 # Reserved word
 TokenReserveds = {
+    # Keyword
     'nil': 'KW_NIL', 
     'for': 'KW_FOR', 
     'in': 'KW_IN', 
@@ -20,10 +21,11 @@ TokenReserveds = {
     'match': 'KW_MATCH', 
     'const': 'KW_CONST', 
     'struct': 'KW_STRUCT', 
+    'variadic': 'KW_VARIADIC',
+    'union': 'KW_UNION',
     'func': 'KW_FUNC', 
-    #'stack': 'KW_STACK', 
     'let': 'KW_LET',
-    #Types
+    # Types
     'ptr': 'PT_PTR', 
     'bool': 'PT_BOOL', 
     'u8': 'PT_U8', 
@@ -35,7 +37,10 @@ TokenReserveds = {
     'i32': 'PT_I32', 
     'i64': 'PT_I64', 
     'f32': 'PT_F32', 
-    'f64': 'PT_F64'
+    'f64': 'PT_F64',
+    # Encoding
+    'unicode': 'EN_UNICODE',
+    'ascii': 'EN_ASCII'
     }
 
 # Operators
