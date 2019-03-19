@@ -202,8 +202,7 @@ class Lexer:
     def print_token(self, t):
         print('Token {} ({}) in line {} at pos {}'.format(t.type, t.value, t.lineno, self.cal_column(t)))
 
-# Unit Testing
-if __name__ == '__main__':
+def UnitTest():
     print('Unit Testing: Lexer\n')
 
     #create lexer
@@ -274,4 +273,15 @@ if __name__ == '__main__':
     assert tok.type == 'STR_LITERAL' and tok.value == '', 'Failed!'
     print('Pass')
     
+    # Float
+    print('* Float --- ', end='')
+    lexer.input('0.123')
+    tok = lexer.token()
+    assert tok.type == 'FLOAT_LITERAL' and tok.value == 0.123, 'Failed!'
+    print('Pass')
 
+    return True
+
+# Unit Testing
+if __name__ == '__main__':
+    UnitTest()

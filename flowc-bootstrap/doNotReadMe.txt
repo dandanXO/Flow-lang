@@ -63,3 +63,8 @@ type:
 length:
     0: invalid
     1~127: length in byte
+
+* exception handle
+
+Declare function with 'responsive', 
+and caller must implement an error handler

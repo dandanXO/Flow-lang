@@ -1,15 +1,16 @@
 
 # Reserved word
 TokenReserveds = {
-    # Keyword
     'nil': 'KW_NIL', 
     'for': 'KW_FOR', 
     'in': 'KW_IN', 
     'loop': 'KW_LOOP',
+    'while': 'KW_WHILE',
     'continue': 'KW_CONTINUE', 
     'break': 'KW_BREAK', 
     'if': 'KW_IF', 
     'else': 'KW_ELSE',
+    'elif': 'KW_ELIF',
     'not': 'KW_NOT',
     'or': 'KW_OR', 
     'xor': 'KW_XOR', 
@@ -25,6 +26,8 @@ TokenReserveds = {
     'union': 'KW_UNION',
     'func': 'KW_FUNC', 
     'let': 'KW_LET',
+    'enum': 'KW_ENUM',
+    'responsive': 'KW_RESPONSIVE',
     # Types
     'ptr': 'PT_PTR', 
     'bool': 'PT_BOOL', 
