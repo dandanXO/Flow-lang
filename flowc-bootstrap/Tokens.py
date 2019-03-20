@@ -17,7 +17,6 @@ TokenReserveds = {
     'and': 'KW_AND',
     'true': 'KW_TRUE', 
     'false': 'KW_FALSE', 
-    'while': 'KW_WHILE', 
     'return': 'KW_RETURN',
     'match': 'KW_MATCH', 
     'const': 'KW_CONST', 
