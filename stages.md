@@ -11,6 +11,5 @@
 4. if branch, if-else branch, if-elif branch
 5. while loop (while), infinity loop (loop)
 
-**flowc**
-1. main.flo mechanism
-2. Basic interpreter
+**Implementations**
+1. Write a basic interpreter (flowi) for early development
