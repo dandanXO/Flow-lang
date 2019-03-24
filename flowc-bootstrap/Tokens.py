@@ -1,7 +1,6 @@
 
 # Reserved word
 TokenReserveds = {
-    'nil': 'KW_NIL', 
     'for': 'KW_FOR', 
     'in': 'KW_IN', 
     'loop': 'KW_LOOP',
@@ -20,15 +19,12 @@ TokenReserveds = {
     'return': 'KW_RETURN',
     'match': 'KW_MATCH', 
     'const': 'KW_CONST', 
-    'struct': 'KW_STRUCT', 
-    'variadic': 'KW_VARIADIC',
-    'union': 'KW_UNION',
     'func': 'KW_FUNC', 
     'let': 'KW_LET',
-    'enum': 'KW_ENUM',
-    'responsive': 'KW_RESPONSIVE',
+    'pitcher': 'KW_PITCHER',
+    'throw': 'KW_THROW',
+    'catch': 'KW_CATCH',
     # Types
-    'ptr': 'PT_PTR', 
     'bool': 'PT_BOOL', 
     'u8': 'PT_U8', 
     'u16': 'PT_U16', 
@@ -40,6 +36,9 @@ TokenReserveds = {
     'i64': 'PT_I64', 
     'f32': 'PT_F32', 
     'f64': 'PT_F64',
+    'enum': 'PT_ENUM',
+    'struct': 'PT_STRUCT', 
+    'union': 'PT_UNION',
     # Encoding
     'unicode': 'EN_UNICODE',
     'ascii': 'EN_ASCII'

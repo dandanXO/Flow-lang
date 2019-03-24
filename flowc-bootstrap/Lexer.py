@@ -164,7 +164,6 @@ class Lexer:
                     pass
 
     def t_error(self, t):
-
         #try to analysis reason
         reason = self.analysis_reason(t)
         #extract the line where error occur

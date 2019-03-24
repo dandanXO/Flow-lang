@@ -1,4 +1,5 @@
 from Lexer import Lexer
+from Tokens import TokenList
 import ply.yacc
 
 class Parser:
@@ -8,6 +9,6 @@ class Parser:
     def build(self, lexer):
         pass
 
-if __name__ '__main__':
+if __name__ == '__main__':
     pass
 
