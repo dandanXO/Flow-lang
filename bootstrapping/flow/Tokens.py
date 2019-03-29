@@ -1,8 +1,6 @@
 
 # Reserved word
 TokenReserveds = {
-    'for': 'KW_FOR', 
-    'in': 'KW_IN', 
     'loop': 'KW_LOOP',
     'while': 'KW_WHILE',
     'continue': 'KW_CONTINUE', 
@@ -17,13 +15,9 @@ TokenReserveds = {
     'true': 'KW_TRUE', 
     'false': 'KW_FALSE', 
     'return': 'KW_RETURN',
-    'match': 'KW_MATCH', 
     'const': 'KW_CONST', 
     'func': 'KW_FUNC', 
     'let': 'KW_LET',
-    'pitcher': 'KW_PITCHER',
-    'throw': 'KW_THROW',
-    'catch': 'KW_CATCH',
     # Types
     'bool': 'PT_BOOL', 
     'u8': 'PT_U8', 
@@ -34,43 +28,82 @@ TokenReserveds = {
     'i16': 'PT_I16', 
     'i32': 'PT_I32', 
     'i64': 'PT_I64', 
-    'f32': 'PT_F32', 
-    'f64': 'PT_F64',
-    'enum': 'PT_ENUM',
-    'struct': 'PT_STRUCT', 
-    'union': 'PT_UNION',
-    # Encoding
-    'unicode': 'EN_UNICODE',
-    'ascii': 'EN_ASCII'
     }
 
 # Operators
 TokenOperators = {\
     # !, !=, @, :
-    '!': 'SYM_NOT', '!=': 'SYM_NOT_EQUAL', '@': 'SYM_AT', ':': 'SYM_COLON',\
+    '!': 'SYM_NOT', 
+    '!=': 'SYM_NOT_EQUAL', 
+    # '@': 'SYM_AT', 
+    # ':': 'SYM_COLON',
+
     # $, %, %=, ^
-    '$': 'SYM_DOLLAR', '%': 'SYM_REMAINDER', '%=': 'SYM_ASSIGN_REMAINDER', '^': 'SYM_XOR', \
+    # '$': 'SYM_DOLLAR', 
+    '%': 'SYM_REMAINDER', 
+    '%=': 'SYM_ASSIGN_REMAINDER', 
+    '^': 'SYM_XOR',
+
     # ^=, &, &=, *
-    '^=': 'SYM_ASSIGN_XOR', '&': 'SYM_AND', '&=': 'SYM_ASSIGN_AND', '*': 'SYM_ASTERISK', \
+    '^=': 'SYM_ASSIGN_XOR', 
+    '&': 'SYM_AND', 
+    '&=': 'SYM_ASSIGN_AND', 
+    '*': 'SYM_ASTERISK',
+
     # *=, (, ), -
-    '*=': 'SYM_ASSIGN_MULTIPLY', '(': 'SYM_PAREN_OPEN', ')': 'SYM_PAREN_CLOSE', '-': 'SYM_MINUS', \
+    '*=': 'SYM_ASSIGN_MULTIPLY', 
+    '(': 'SYM_PAREN_OPEN', 
+    ')': 'SYM_PAREN_CLOSE', 
+    '-': 'SYM_MINUS',
+
     # --, -=, +, ++
-    '--': 'SYM_MINUS_ONE', '-=': 'SYM_ASSIGN_SUBTRACT', '+': 'SYM_ADD', '++': 'SYM_PLUS_ONE', \
+    '--': 'SYM_MINUS_ONE', 
+    '-=': 'SYM_ASSIGN_SUBTRACT', 
+    '+': 'SYM_ADD', 
+    '++': 'SYM_PLUS_ONE',
+
     # +=, =, ==, [
-    '+=': 'SYM_ASSIGN_PLUS', '=': 'SYM_ASSIGN', '==': 'SYM_EQUAL', '[': 'SYM_BRACE_OPEN', \
+    '+=': 'SYM_ASSIGN_PLUS', 
+    '=': 'SYM_ASSIGN', 
+    '==': 'SYM_EQUAL', 
+    # '[': 'SYM_BRACE_OPEN',
+
     # ], {, }, |
-    ']': 'SYM_BRACE_CLOSE', '{': 'SYM_BRACKET_OPEN', '}': 'SYM_BRACKET_CLOSE', '|': 'SYM_OR', \
+    # ']': 'SYM_BRACE_CLOSE', 
+    '{': 'SYM_BRACKET_OPEN', 
+    '}': 'SYM_BRACKET_CLOSE', 
+    '|': 'SYM_OR',
+
     # |=, /, /=, ;
-    '|=': 'SYM_ASSIGN_OR', '/': 'SYM_DIVIDE', '/=': 'SYM_ASSIGN_DIVIDE', ';': 'SYM_SEMICOLON', \
+    '|=': 'SYM_ASSIGN_OR', 
+    '/': 'SYM_DIVIDE', 
+    '/=': 'SYM_ASSIGN_DIVIDE', 
+    # ';': 'SYM_SEMICOLON',
+
     # <, <=, <<, <<=
-    '<': 'SYM_LESS', '<=': 'SYM_LESS_EQUAL', '<<': 'SYM_SHIFT_LEFT', '<<=': 'SYM_ASSIGN_SHIFT_LEFT', \
+    '<': 'SYM_LESS', 
+    '<=': 'SYM_LESS_EQUAL', 
+    '<<': 'SYM_SHIFT_LEFT', 
+    '<<=': 'SYM_ASSIGN_SHIFT_LEFT',
+
     # >, >=, >>, >>=
-    '>': 'SYM_GREATER', '>=': 'SYM_GREATER_EQUAL', '>>': 'SYM_SHIFT_RIGHT', '>>=': 'SYM_ASSIGN_SHIFT_RIGHT', \
+    '>': 'SYM_GREATER', 
+    '>=': 'SYM_GREATER_EQUAL', 
+    '>>': 'SYM_SHIFT_RIGHT', 
+    '>>=': 'SYM_ASSIGN_SHIFT_RIGHT',
+
     # , ~
-    ',': 'SYM_COMMA', '~': 'SYM_RANGE'}
+    ',': 'SYM_COMMA', 
+    # '~': 'SYM_RANGE'
+}
 
 # Shapeless tokens
-TokenShapeless = ['IDENTIFIER', 'STR_LITERAL', 'CHAR_LITERAL', 'FLOAT_LITERAL', 'INT_LITERAL']
+TokenShapeless = [
+    'IDENTIFIER', 
+    # 'STR_LITERAL', 
+    # 'CHAR_LITERAL', 
+    # 'FLOAT_LITERAL', 
+    'INT_LITERAL']
 
 # Contain all tokens
 TokenList = list(TokenReserveds.values()) + list(TokenOperators.values()) + TokenShapeless
