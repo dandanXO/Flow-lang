@@ -27,10 +27,6 @@ class Parser:
     #                       Actual Syntax
     #############################################################
 
-    def p_statement(self, p):
-        'statement : expression'
-        p[0] = p[1]
-
     def p_expression_BinOp(self, p):
         '''
             expression : expression arithmetic expression
@@ -45,7 +41,7 @@ class Parser:
         '''
             expression : SYM_NOT expression %prec UNARY
                        | SYM_MINUS expression %prec UNARY
-                       | KW_NOT expression
+                       | KW_NOT expression %prec UNARY
         '''
         p[0] = UnaryNode(p[1], p[2])
 
@@ -81,13 +77,31 @@ class Parser:
                         | KW_LET multi_var_assign
         '''
 
+    def p_statement_branch(self, p):
+        '''
+            statement : if_statement
+                        | if_statement elif_statement
+                        | if_statement else_statement
+                        | if_statement elif_statement else_statement
+        '''
 
-    def p_statement_if(self, p):
+    def p_if_statement(self, p):
         '''
-            statement : KW_IF expression scope_statement
-                         | if_statement KW_ELIF expression scope_statement
-                         | if_statement KW_ELSE expression scope_statement
+            if_statement : KW_IF expression scope_statement
         '''
+        p[0] = IfBranchNode(p[2], p[3])
+
+    def p_elif_statement(self, p):
+        '''
+            elif_statment : KW_ELIF expression scope_statement
+                        | elif_statment elif_statement
+        '''
+
+
+    def p_else_statement(self, p):
+        'else_statement : KW_ELSE scope_statement'
+        p[0] = p[2]
+
     def p_statement_scope(self, p):
         '''
             scope_statement : SYM_BRACKET_OPEN SYM_BRACKET_CLOSE
@@ -97,6 +111,9 @@ class Parser:
     #############################################################
     #                       Routines
     #############################################################
+    def p_statement(self, p):
+        'statement : expression'
+        p[0] = p[1]
 
     def p_multi_var_assign(self, p):
         '''

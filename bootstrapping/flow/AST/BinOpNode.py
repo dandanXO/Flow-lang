@@ -121,4 +121,4 @@ class BinOpNode(ASTNode):
             return 0
 
         else:
-            raise SyntaxError('[BinOpNode] Unknown operator.')
+            raise SyntaxError('[BinOpNode] Unknown operator: {}'.format(self.op))

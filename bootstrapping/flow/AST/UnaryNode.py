@@ -20,13 +20,14 @@ class UnaryNode(ASTNode):
             raise SyntaxError('[UnaryNode] Expression is not an integer.')
 
         if self.op == '!':
-            if expr_ret != 0:
-                return 0
-            return 1
+            return ~expr_ret
+
         elif self.op == '-':
             return -expr_ret
         elif self.op == 'not':
-
+            if expr_ret != 0:
+                return 0
+            return 1
         else:
-            raise SyntaxError('[UnaryNode] Unknown operator.')
+            raise SyntaxError('[UnaryNode] Unknown operator: {}'.format(self.op))
 

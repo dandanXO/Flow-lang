@@ -14,7 +14,6 @@ class LexicalError(Exception):
 # The lexer class
 class Lexer:
     
-    
     def __init__(self, text, **args):
         # plex will use this
         self.tokens = TokenList
@@ -279,3 +278,4 @@ def UnitTest():
 # Unit Testing
 if __name__ == '__main__':
     UnitTest()
+    
