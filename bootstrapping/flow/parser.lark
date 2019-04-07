@@ -1,0 +1,15 @@
+
+%import common.INT -> INTEGER
+%import common.HEXDIGIT -> HEX_INTEGER
+%import common.CNAME -> IDENTIFIER
+%import common.WS -> WHITESPACES
+
+%ignore WHITESPACES
+%ignore COMMENT
+
+COMMENT: /\#.*/
+
+BIN_INTEGER: /([10]+)b/
+
+NUMBER: INTEGER | HEX_INTEGER | BIN_INTEGER
+
