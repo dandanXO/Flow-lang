@@ -1,0 +1,141 @@
+%import common.INT -> INTEGER
+%import common.HEXDIGIT -> HEX_INTEGER
+%import common.CNAME -> IDENTIFIER
+%import common.WS
+//Ignores//
+%ignore WS
+%ignore COMMENT
+
+//Regexs//
+COMMENT: /\#.*/
+BIN_INTEGER: /([10]+)b/
+
+//Terminals//
+NUMBER: INTEGER | HEX_INTEGER | BIN_INTEGER
+
+TYPES: "u8" | "u16" | "u32" | "u64"
+    | "i8" | "i16" | "i32" | "i64"
+    | "bool"
+
+TYPES_W_LET: TYPES | "let"
+
+OPERATORS: "+" | "-" | "*" | "/" | "%" 
+         | "^" | "&" | "|" | "<<" | ">>"
+
+BOOLEAN_VALUE: "true" | "false"
+
+//Rules//
+?statement: const_decl+
+          | declaration+
+          | function_decl
+          | assign+
+          | condition+
+          | expression+
+          | infinity_loop+
+          | codeblock+
+          | while_loop+
+          | "continue" -> continue
+          | "break" -> break
+          | return_statement+
+          | if_statement+
+
+declaration: TYPES_W_LET IDENTIFIER "=" value
+           | TYPES_W_LET ident_gp "=" (value | value_gp)
+           
+const_decl: "const" declaration
+
+assign: IDENTIFIER "=" value
+      | IDENTIFIER "+=" value -> assign_add
+      | IDENTIFIER "-=" value -> assign_sub
+      | IDENTIFIER "*=" value -> assign_mul
+      | IDENTIFIER "/=" value -> assign_div
+      | IDENTIFIER "%=" value -> assign_rem
+      | IDENTIFIER "<<=" value -> assign_shl
+      | IDENTIFIER ">>=" value -> assign_shr
+      | IDENTIFIER "|=" value -> assign_or
+      | IDENTIFIER "&=" value -> assign_and
+      | IDENTIFIER "^=" value -> assign_xor
+
+?expression: "(" expression ")"
+           | binop
+           | unary_op
+           | condition
+           | comparators
+           | function_call
+
+//Condition rules
+condition: "not" (BOOLEAN_VALUE | comparators) -> bool_not
+           | expression "or" expression -> bool_or
+           | expression "and" expression -> bool_and
+           | expression "xor" expression -> bool_xor
+           | "or" "(" value_gp ")" -> chain_or
+           | "and" "(" value_gp ")" -> chain_and
+           | "xor" "(" value_gp ")" -> chain_xor
+
+//Values comparations
+comparators: value "==" value -> equal
+            | value "!=" value -> not_equal
+            | value "<" value -> less_than
+            | value ">" value -> greater_than
+            | value "<=" value -> less_or_equal
+            | value ">=" value -> greater_or_equal
+            | "(" comparators ")"
+
+//Low priority arithmetic operations
+?binop: hi_arith
+         | (hi_arith | value) "+" (hi_arith | value) -> add
+         | (hi_arith | value) "-" (hi_arith | value) -> subtract
+
+//accept empty, single variable and multiply variables
+function_call: IDENTIFIER "(" (value? | value_gp?) ")"
+
+//High priority arithmetic operations
+?hi_arith: value "*" value -> multiply
+         | value "/" value -> divide
+         | value "%" value -> remainder
+         | value "<<" value -> shift_left
+         | value ">>" value -> shift_right
+         | value "|" value -> bin_or
+         | value "&" value -> bin_and
+         | value "^" value -> bin_xor
+
+?value: INTEGER -> decimal
+     | "0x" HEX_INTEGER -> heximal
+     | BIN_INTEGER -> binary
+     | IDENTIFIER
+     | expression
+     | "(" value ")"
+
+?unary_op: "-" value -> negative
+         | "!" value -> bin_not
+         | IDENTIFIER "++" -> increase_one
+         | IDENTIFIER "--" -> decrease_one
+
+ident_gp: (IDENTIFIER ",")+ IDENTIFIER
+
+value_gp: (value ",")+ value
+
+argument_gp: (arg_decl ",")+ arg_decl
+
+?arg_decl: TYPES IDENTIFIER
+
+codeblock: "{" statement* "}"
+
+infinity_loop: "loop" codeblock
+
+while_loop: "while" value codeblock
+
+// for_loop: "for" (IDENTIFIER | ident_gp) "in" iteratable codeblock
+
+iteratable: value "~" value
+
+return_statement: "return"
+                | "return" value
+
+if_statement: "if" value codeblock elif_statement* else_statement*
+
+elif_statement: "elif" value codeblock
+
+else_statement: "else" codeblock
+
+function_decl: "func" IDENTIFIER "(" (arg_decl? | argument_gp?) ")" ("->" TYPES)* codeblock
