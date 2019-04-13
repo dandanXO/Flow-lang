@@ -15,10 +15,6 @@ The bootstrap compiler will be written in pure python, with several python libra
  - [ ] C FFI
  - [ ] Basic SSL
 
-**Milestones**
-
-2. Compiling <-> Interpreting
-
 ## Compiler Architecture
 **Preprocessing**
 
