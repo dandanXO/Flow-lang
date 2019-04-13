@@ -30,12 +30,12 @@ Workflow:
 
 **Lexer**
 
-Extracting tokens from processed source code using PLY
+Extracting tokens from processed source code using Lark
 
 
 **Parser**
 
-Generate AST from stream of tokens using PLY
+Generate AST from stream of tokens using Lark
 
 **Code Generation**
 
